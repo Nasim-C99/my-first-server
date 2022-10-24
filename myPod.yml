@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple_server
+  labels:
+    tier: front-end
+spec:
+  containers:
+  - name: simple_server
+    image: nasimc99/simple_server
+    ports:
+    - containerPort: 80
