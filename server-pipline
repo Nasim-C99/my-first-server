@@ -1,0 +1,37 @@
+pipeline {
+    
+    environment {
+            DOCKERHUB_CREDENTIALS = credentials('nasimc99-dockerhub')
+        }
+    agent { any { image 'python:3.9' } }
+    stages {
+        stage('Clear containers') {
+            steps {
+                sh "docker stop \044(docker ps -a -q)"
+                sh "docker rm \044(docker ps -a -q)"
+            }
+        } 
+        stage('Retrieve Files') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Nasim-C99/my-first-server.git']]])
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "docker build . -t simple_server"
+            }
+        }
+        stage('Run') {
+            steps {
+                sh "docker run -p 8000:8000 simple_server"
+            }
+        } 
+        stage('Push') {
+            steps {
+                sh "docker tag simple_server nasimc99/simple_server"
+                sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                sh "docker push nasimc99/simple_server"
+            }
+        }    
+    }
+}
